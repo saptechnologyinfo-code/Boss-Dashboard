@@ -6,6 +6,12 @@
 <meta name="theme-color" content="#060a18" />
 <meta name="color-scheme" content="dark" />
 <meta name="robots" content="noindex,nofollow" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icon.svg" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Salary Room" />
 <title>Salary Control Room — Boss View</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%8E%3C/text%3E%3C/svg%3E" />
 <style>
@@ -239,7 +245,19 @@ h2.sec::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(
 .skel{height:190px;border-radius:18px;background:linear-gradient(100deg,rgba(255,255,255,.04) 30%,rgba(255,255,255,.12) 50%,rgba(255,255,255,.04) 70%);background-size:300% 100%;animation:shim 1.4s linear infinite;border:1px solid var(--bd);}
 @keyframes shim{from{background-position:100% 0;}to{background-position:-100% 0;}}
 footer{margin:30px 4px 0;text-align:center;color:var(--mu);font-size:.72rem;line-height:1.6;}
+/* install popup */
+.inst{position:fixed;left:0;right:0;bottom:0;z-index:100;display:flex;justify-content:center;padding:12px max(12px,env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));pointer-events:none;transform:translateY(130%);opacity:0;transition:transform .55s cubic-bezier(.2,.9,.3,1.1),opacity .4s;}
+.inst.show{transform:none;opacity:1;}
+.inst-c{pointer-events:auto;width:100%;max-width:460px;padding:14px;background:rgba(14,20,48,.92);display:grid;gap:12px;}
+.inst-t{display:flex;gap:12px;align-items:center;}
+.inst-i{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-size:1.5rem;background:linear-gradient(135deg,var(--vio),var(--blue));flex:none;box-shadow:0 6px 18px rgba(139,107,255,.5);}
+.inst-t b{display:block;font-size:.98rem;}
+.inst-t small{color:var(--mu);font-size:.76rem;line-height:1.4;display:block;margin-top:2px;}
+.inst-ios{font-size:.8rem;color:#cdd6f6;background:rgba(255,255,255,.06);border-radius:10px;padding:9px 11px;line-height:1.5;}
+.inst-b{display:flex;gap:8px;}
+.inst-b .pill{flex:1;}
 @media(prefers-reduced-motion:reduce){
+  .inst{transition:none;}
   .floor,.fcube,.ring3d,.logo,.kpi .ic,.kw,.tl-b,.dot,.st.working::before{animation:none !important;}
   .cube,.grp .val,.pbar i,.it .meter i,.fi,.kpi{transition:none !important;}
   .ring3d{transform:rotateX(60deg);}
@@ -327,6 +345,14 @@ footer{margin:30px 4px 0;text-align:center;color:var(--mu);font-size:.72rem;line
   </div>
   <div class="grid" id="grid"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
 
+  <div class="inst" id="inst" role="dialog" aria-label="Install app">
+    <div class="inst-c gl">
+      <div class="inst-t"><div class="inst-i">💎</div><div><b>Install Salary Control Room</b><small>Add it to your home screen for one-tap access and a full-screen app experience.</small></div></div>
+      <div class="inst-ios hidden" id="instIos">On iPhone / iPad: tap the <b>Share</b> button <span aria-hidden="true">⬆️</span> in Safari, then choose <b>“Add to Home Screen”</b>.</div>
+      <div class="inst-b"><button class="pill" id="instNo" type="button">Not now</button><button class="pill on" id="instYes" type="button">Install app</button></div>
+    </div>
+  </div>
+
   <footer>🔒 Read-only dashboard — it can view salary records but cannot add, edit or delete anything.<br /><span id="foot"></span></footer>
 </div>
 
@@ -334,7 +360,7 @@ footer{margin:30px 4px 0;text-align:center;color:var(--mu);font-size:.72rem;line
 const EDGE_FUNCTION_URL = "https://acdyletpjdmrqddylgcn.supabase.co/functions/v1/smart-responder";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFjZHlsZXRwamRtcnFkZHlsZ2NuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4MDA2NTUsImV4cCI6MjEwNTM3NjY1NX0.2JaoROSxmbbo1Dah-oiBqKULru1Gz8koL0wBlMJbEyI";
 const DEMO = /[?&]demo(=1)?(&|$)/.test(location.search);       // ?demo=1 shows sample data (no server needed)
-const REFRESH_MS = 60000;
+const REFRESH_MS = 60 * 60 * 1000;                             // auto sync every 1 hour
 const reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------- READ-ONLY API: only these backend functions can ever be called from this page ---------- */
@@ -466,7 +492,7 @@ async function load(manual){
     renderAll();
     const d = new Date();
     setStatus(isToday() ? '' : 'past', (isToday() ? 'Live · updated ' : 'Updated ') + p2(d.getHours()) + ':' + p2(d.getMinutes()) + ':' + p2(d.getSeconds()));
-    $('foot').textContent = 'Showing ' + niceDate(myDay) + (isToday() ? ' · refreshes automatically every minute' : '');
+    $('foot').textContent = 'Showing ' + niceDate(myDay) + (isToday() ? ' · syncs automatically every hour' : '');
   }catch(e){
     setStatus('err', lastOk ? 'Offline · last update ' + new Date(lastOk).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : 'Could not load');
     showBanner(lastOk ? '⚠ Connection problem — showing the last data received. Retrying automatically…' : '⚠ Could not load data: ' + e.message);
@@ -475,7 +501,7 @@ async function load(manual){
   busy = false; restartCountdown();
 }
 setInterval(() => { if(!document.hidden && isToday()) load(); }, REFRESH_MS);
-document.addEventListener('visibilitychange', () => { if(!document.hidden && Date.now() - lastOk > 30000) load(); });
+document.addEventListener('visibilitychange', () => { if(!document.hidden && isToday() && Date.now() - lastOk > REFRESH_MS) load(); });
 
 /* =====================================================================
  * derived values
@@ -499,7 +525,7 @@ function dayTotals(){
     t.sd += num(e.salary_due); t.td += num(e.transport_due); t.sp += num(e.salary_paid); t.tp += num(e.transport_paid);
     t.etf += num(e.etf_deduction); t.setl += num(e.arrears_salary_paid) + num(e.arrears_transport_paid);
     if(e.time_in && e.time_out) t.mins += durMin(t5(e.time_in), t5(e.time_out));
-    else if(e.time_in && isToday() && st === 'working') t.mins += durMin(t5(e.time_in), p2(Math.floor(nowMin() / 600)) + ':' + p2(nowMin() % 600));
+    else if(e.time_in && isToday() && st === 'working') t.mins += durMin(t5(e.time_in), p2(Math.floor(nowMin() / 60)) + ':' + p2(nowMin() % 60));
   });
   return t;
 }
@@ -797,6 +823,40 @@ function demoApi(fn, args){
   }
   return null;
 }
+
+/* =====================================================================
+ * Install as mobile app (PWA) popup
+ * ===================================================================== */
+(function installPrompt(){
+  const KEY = 'scr_install_dismissed', WAIT = 7 * 864e5;           // ask again after 7 days
+  const box = $('inst'); let deferred = null, shown = false;
+  const standalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+  const dismissed = () => { try{ return Date.now() - Number(localStorage.getItem(KEY) || 0) < WAIT; }catch(e){ return false; } };
+  const remember = () => { try{ localStorage.setItem(KEY, String(Date.now())); }catch(e){} };
+  const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isMobile = isIos || /android|mobile/i.test(navigator.userAgent);
+  function show(){ if(shown || standalone() || dismissed()) return; shown = true; setTimeout(() => box.classList.add('show'), 2500); }
+  function hide(){ box.classList.remove('show'); }
+
+  if('serviceWorker' in navigator && location.protocol !== 'file:'){
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; show(); });
+  window.addEventListener('appinstalled', () => { deferred = null; hide(); remember(); });
+
+  $('instNo').addEventListener('click', () => { remember(); hide(); });
+  $('instYes').addEventListener('click', async () => {
+    if(deferred){
+      deferred.prompt();
+      try{ const r = await deferred.userChoice; if(r.outcome !== 'accepted') remember(); }catch(e){}
+      deferred = null; hide();
+    }else{ $('instIos').classList.remove('hidden'); $('instYes').classList.add('hidden'); $('instNo').textContent = 'Got it'; }
+  });
+
+  // iOS Safari has no install event, so show the instructions directly (mobile only)
+  if(isIos && isMobile){ $('instYes').textContent = 'How to install'; show(); }
+  if(DEMO && !standalone()) { shown = false; show(); }             // ?demo=1 always previews the popup
+})();
 
 /* ---------- go ---------- */
 $('dayIn').value = day; renderChips();
