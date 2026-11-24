@@ -1,0 +1,15 @@
+{
+  "name": "Salary Control Room — Boss View",
+  "short_name": "Salary Room",
+  "description": "Live read-only salary dashboard",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#060a18",
+  "theme_color": "#060a18",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
