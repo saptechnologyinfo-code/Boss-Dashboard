@@ -499,7 +499,7 @@ function dayTotals(){
     t.sd += num(e.salary_due); t.td += num(e.transport_due); t.sp += num(e.salary_paid); t.tp += num(e.transport_paid);
     t.etf += num(e.etf_deduction); t.setl += num(e.arrears_salary_paid) + num(e.arrears_transport_paid);
     if(e.time_in && e.time_out) t.mins += durMin(t5(e.time_in), t5(e.time_out));
-    else if(e.time_in && isToday() && st === 'working') t.mins += durMin(t5(e.time_in), p2(Math.floor(nowMin() / 60)) + ':' + p2(nowMin() % 60));
+    else if(e.time_in && isToday() && st === 'working') t.mins += durMin(t5(e.time_in), p2(Math.floor(nowMin() / 600)) + ':' + p2(nowMin() % 600));
   });
   return t;
 }
