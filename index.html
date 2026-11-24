@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#060a18" />
+<meta name="color-scheme" content="dark" />
+<meta name="robots" content="noindex,nofollow" />
+<title>Salary Control Room — Boss View</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%8E%3C/text%3E%3C/svg%3E" />
+<style>
+:root{
+  --bg:#060a18; --glass:rgba(255,255,255,.055); --glass2:rgba(255,255,255,.1); --bd:rgba(255,255,255,.13);
+  --tx:#eef2ff; --mu:#93a0c4; --blue:#4cc9f0; --vio:#8b6bff; --grn:#2de2a6; --amb:#ffb703; --red:#ff5d7a; --grey:#8b95b3; --pink:#ff7ad9;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;background:var(--bg);color:var(--tx);font-family:'Segoe UI',system-ui,-apple-system,Roboto,'Helvetica Neue',Arial,sans-serif;-webkit-text-size-adjust:100%;}
+body{min-height:100vh;overflow-x:hidden;font-variant-numeric:tabular-nums;}
+button,input{font:inherit;color:inherit;}
+.hidden{display:none !important;}
+
+/* ================= 3D background ================= */
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+  background:radial-gradient(1100px 600px at 12% -8%,rgba(139,107,255,.38),transparent 60%),
+             radial-gradient(900px 520px at 100% 8%,rgba(76,201,240,.26),transparent 62%),
+             radial-gradient(700px 500px at 50% 120%,rgba(45,226,166,.14),transparent 60%),
+             linear-gradient(#060a18,#0a1030 60%,#060a18);}
+.floor{position:absolute;left:-60%;right:-60%;bottom:-6%;height:62%;transform:perspective(520px) rotateX(63deg);transform-origin:50% 100%;
+  background-image:linear-gradient(rgba(76,201,240,.24) 1px,transparent 1px),linear-gradient(90deg,rgba(139,107,255,.24) 1px,transparent 1px);
+  background-size:58px 58px;animation:floorMove 7s linear infinite;
+  -webkit-mask-image:linear-gradient(transparent,#000 70%);mask-image:linear-gradient(transparent,#000 70%);}
+@keyframes floorMove{from{background-position:0 0,0 0;}to{background-position:0 58px,0 0;}}
+.fcube{position:absolute;transform-style:preserve-3d;animation:cubeSpin 18s linear infinite;opacity:.55;}
+.fcube i{position:absolute;inset:0;border:1px solid rgba(255,255,255,.28);background:linear-gradient(135deg,rgba(139,107,255,.22),rgba(76,201,240,.1));}
+.fcube i:nth-child(1){transform:translateZ(calc(var(--s)/2));}
+.fcube i:nth-child(2){transform:rotateY(180deg) translateZ(calc(var(--s)/2));}
+.fcube i:nth-child(3){transform:rotateY(90deg) translateZ(calc(var(--s)/2));}
+.fcube i:nth-child(4){transform:rotateY(-90deg) translateZ(calc(var(--s)/2));}
+.fcube i:nth-child(5){transform:rotateX(90deg) translateZ(calc(var(--s)/2));}
+.fcube i:nth-child(6){transform:rotateX(-90deg) translateZ(calc(var(--s)/2));}
+@keyframes cubeSpin{from{transform:rotateX(20deg) rotateY(0deg) translateY(0);}50%{transform:rotateX(200deg) rotateY(180deg) translateY(-26px);}to{transform:rotateX(380deg) rotateY(360deg) translateY(0);}}
+
+/* ================= layout ================= */
+.wrap{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:max(10px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) calc(40px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));}
+.gl{background:var(--glass);border:1px solid var(--bd);border-radius:18px;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  box-shadow:0 12px 34px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.09);}
+h2.sec{margin:26px 4px 10px;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mu);display:flex;align-items:center;gap:10px;}
+h2.sec::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--bd),transparent);}
+
+/* header */
+.hd{position:sticky;top:6px;z-index:30;padding:10px 12px;margin-top:6px;}
+.hd-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.logo{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:1.3rem;background:linear-gradient(135deg,var(--vio),var(--blue));box-shadow:0 6px 18px rgba(139,107,255,.5);flex:none;animation:logoSpin 9s ease-in-out infinite;transform-style:preserve-3d;}
+@keyframes logoSpin{0%,100%{transform:perspective(300px) rotateY(-18deg);}50%{transform:perspective(300px) rotateY(18deg);}}
+.ttl{min-width:0;flex:1 1 160px;}
+.ttl b{display:block;font-size:1.05rem;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ttl small{color:var(--mu);font-size:.74rem;}
+.ro{display:inline-flex;align-items:center;gap:5px;font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;border-radius:999px;background:rgba(45,226,166,.12);border:1px solid rgba(45,226,166,.4);color:var(--grn);}
+.clock{text-align:right;line-height:1.15;flex:none;}
+.clock b{font-size:1.15rem;display:block;}
+.clock small{color:var(--mu);font-size:.7rem;}
+.hd-bot{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.dnav{display:flex;align-items:center;gap:6px;flex:1 1 260px;}
+.ib{width:40px;height:40px;border-radius:12px;border:1px solid var(--bd);background:var(--glass2);font-size:1.05rem;display:grid;place-items:center;cursor:pointer;flex:none;transition:transform .15s,background .15s;}
+.ib:active{transform:scale(.92);} .ib:hover{background:rgba(255,255,255,.16);}
+.dnav input[type=date]{flex:1;min-width:0;height:40px;border-radius:12px;border:1px solid var(--bd);background:var(--glass2);padding:0 10px;color-scheme:dark;}
+.pill{height:40px;padding:0 14px;border-radius:12px;border:1px solid var(--bd);background:var(--glass2);font-weight:700;cursor:pointer;font-size:.85rem;}
+.pill.on{background:linear-gradient(135deg,var(--vio),var(--blue));border-color:transparent;}
+.upd{font-size:.72rem;color:var(--mu);display:flex;align-items:center;gap:6px;margin-left:auto;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--grn);box-shadow:0 0 0 0 rgba(45,226,166,.7);animation:pulse 1.8s infinite;flex:none;}
+.dot.busy{background:var(--amb);} .dot.err{background:var(--red);animation:none;} .dot.past{background:var(--grey);animation:none;}
+@keyframes pulse{70%{box-shadow:0 0 0 8px rgba(45,226,166,0);}100%{box-shadow:0 0 0 0 rgba(45,226,166,0);}}
+.cd{position:absolute;left:12px;right:12px;bottom:0;height:2px;border-radius:2px;overflow:hidden;}
+.cd i{display:block;height:100%;width:100%;transform-origin:left;background:linear-gradient(90deg,var(--vio),var(--blue),var(--grn));}
+.cd i.run{animation:cdr var(--cdur,60s) linear forwards;}
+@keyframes cdr{from{transform:scaleX(0);}to{transform:scaleX(1);}}
+.banner{margin:10px 2px 0;padding:10px 14px;border-radius:12px;font-size:.84rem;border:1px solid rgba(255,93,122,.45);background:rgba(255,93,122,.12);color:#ffc2cc;}
+
+/* alerts */
+.alerts{display:flex;gap:8px;flex-wrap:wrap;margin:12px 2px 0;}
+.al{padding:7px 12px;border-radius:999px;font-size:.78rem;font-weight:700;border:1px solid var(--bd);background:var(--glass);display:inline-flex;gap:6px;align-items:center;}
+.al.w{border-color:rgba(255,183,3,.5);color:#ffd36b;} .al.r{border-color:rgba(255,93,122,.5);color:#ff9fb0;} .al.g{border-color:rgba(45,226,166,.5);color:#8ff0cc;} .al.b{border-color:rgba(76,201,240,.5);color:#9be4f8;}
+
+/* KPI tiles */
+.kgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px;perspective:1200px;}
+@media(min-width:720px){.kgrid{grid-template-columns:repeat(4,1fr);gap:14px;}}
+.kw{animation:rise .75s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*70ms);}
+@keyframes rise{from{opacity:0;transform:translateY(26px) rotateX(-16deg) scale(.96);}to{opacity:1;transform:none;}}
+.kpi{--rx:0deg;--ry:0deg;position:relative;padding:14px 14px 13px;overflow:hidden;min-height:112px;
+  transform:perspective(800px) rotateX(var(--rx)) rotateY(var(--ry));transition:transform .35s cubic-bezier(.2,.8,.2,1);transform-style:preserve-3d;}
+.kpi.tilting{transition:transform .07s linear;}
+.kpi::before{content:"";position:absolute;inset:0;background:radial-gradient(220px 120px at 100% 0%,var(--c),transparent 70%);opacity:.28;pointer-events:none;}
+.kpi::after{content:"";position:absolute;inset:0;background:radial-gradient(160px 160px at var(--gx,50%) var(--gy,0%),rgba(255,255,255,.2),transparent 60%);opacity:var(--go,0);transition:opacity .25s;pointer-events:none;}
+.kpi .ic{position:absolute;right:10px;top:8px;font-size:1.45rem;animation:bob 3.6s ease-in-out infinite;filter:drop-shadow(0 6px 8px rgba(0,0,0,.5));transform:translateZ(34px);}
+@keyframes bob{50%{transform:translateZ(34px) translateY(-5px) rotate(6deg);}}
+.kpi .lb{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);font-weight:700;padding-right:34px;}
+.kpi .vl{font-size:clamp(1.15rem,4.6vw,1.65rem);font-weight:800;margin-top:6px;line-height:1.1;transform:translateZ(22px);word-break:break-word;}
+.kpi .sb{font-size:.72rem;color:var(--mu);margin-top:6px;line-height:1.35;}
+.kpi .bar{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--c);opacity:.9;}
+.strip{display:flex;gap:8px;flex-wrap:wrap;margin:12px 2px 0;}
+.strip span{font-size:.76rem;color:var(--mu);padding:6px 11px;border-radius:10px;border:1px solid var(--bd);background:var(--glass);}
+.strip b{color:var(--tx);}
+
+/* two-column panels */
+.row2{display:grid;gap:14px;grid-template-columns:1fr;}
+@media(min-width:900px){.row2{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);}}
+.pn{padding:14px;position:relative;overflow:hidden;}
+.pn h3{margin:0 0 4px;font-size:.95rem;}
+.pn .sub{color:var(--mu);font-size:.74rem;margin-bottom:6px;}
+
+/* 3D bar chart */
+.chart{position:relative;perspective:1100px;height:292px;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none;}
+.chart:active{cursor:grabbing;}
+.scene{--ry:0deg;--ch:170px;position:absolute;left:4%;right:4%;top:46px;height:var(--ch);transform-style:preserve-3d;transform:rotateX(-15deg) rotateY(var(--ry));}
+.brow{display:flex;align-items:flex-end;justify-content:space-around;height:100%;transform-style:preserve-3d;}
+.cfloor{position:absolute;left:-3%;width:106%;top:100%;height:130px;transform-origin:50% 0;transform:translateZ(-46px) rotateX(90deg);border-radius:10px;
+  background:linear-gradient(rgba(255,255,255,.05),rgba(255,255,255,.015)),
+    repeating-linear-gradient(0deg,rgba(255,255,255,.1) 0 1px,transparent 1px 26px),repeating-linear-gradient(90deg,rgba(255,255,255,.08) 0 1px,transparent 1px 26px);
+  border:1px solid rgba(255,255,255,.14);}
+.grp{--w:15px;--d:15px;position:relative;display:flex;align-items:flex-end;gap:4px;height:100%;transform-style:preserve-3d;cursor:pointer;}
+@media(min-width:720px){.grp{--w:24px;--d:22px;gap:6px;}}
+.cube{position:relative;width:var(--w);height:var(--h,2px);transform-style:preserve-3d;transition:height 1.1s cubic-bezier(.2,.9,.3,1.15);}
+.cube i{position:absolute;display:block;background:var(--c);backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.cube .f{inset:0;transform:translateZ(calc(var(--d)/2));background-image:linear-gradient(rgba(255,255,255,.34),rgba(255,255,255,0) 65%);}
+.cube .b{inset:0;transform:translateZ(calc(var(--d)/-2)) rotateY(180deg);filter:brightness(.55);}
+.cube .r{top:0;height:100%;width:var(--d);left:calc(100% - var(--d)/2);transform:rotateY(90deg);filter:brightness(.62);}
+.cube .l{top:0;height:100%;width:var(--d);left:calc(0px - var(--d)/2);transform:rotateY(-90deg);filter:brightness(.62);}
+.cube .t{left:0;width:100%;height:var(--d);top:calc(0px - var(--d)/2);transform:rotateX(90deg);filter:brightness(1.4);}
+.cube.sal{--c:#5b8dff;} .cube.trn{--c:#2de2a6;}
+.grp .val{position:absolute;left:50%;bottom:calc(var(--vb,10px) + 14px);transform:translateX(-50%) translateZ(26px);font-size:.66rem;font-weight:800;white-space:nowrap;color:#dfe6ff;text-shadow:0 2px 6px rgba(0,0,0,.7);transition:bottom 1.1s cubic-bezier(.2,.9,.3,1.15);}
+.grp .lab{position:absolute;left:50%;top:calc(100% + 12px);transform:translateX(-50%) translateZ(34px);font-size:.68rem;color:var(--mu);white-space:nowrap;text-align:center;line-height:1.2;}
+.grp .lab b{display:block;font-size:.74rem;color:var(--tx);}
+.grp.sel .lab,.grp.sel .lab b{color:#fff;} .grp.sel .lab b{text-shadow:0 0 12px var(--blue);}
+.grp.sel::after{content:"";position:absolute;left:-30%;right:-30%;bottom:-6px;height:6px;border-radius:50%;background:var(--blue);filter:blur(6px);opacity:.8;}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.74rem;color:var(--mu);margin-top:2px;}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px;}
+.hint{font-size:.68rem;color:var(--mu);opacity:.8;}
+
+/* 3D donut */
+.dwrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;}
+.donut{position:relative;width:200px;height:170px;perspective:760px;flex:none;}
+.ring3d{position:absolute;left:5px;top:-14px;width:190px;height:190px;transform-style:preserve-3d;animation:ringSpin 28s linear infinite;}
+@keyframes ringSpin{from{transform:rotateX(60deg) rotateZ(0deg);}to{transform:rotateX(60deg) rotateZ(360deg);}}
+.rl{position:absolute;inset:0;border-radius:50%;background:var(--g);
+  -webkit-mask:radial-gradient(circle,transparent 0 41%,#000 42%);mask:radial-gradient(circle,transparent 0 41%,#000 42%);}
+.dcenter{position:absolute;inset:0;display:grid;place-items:center;text-align:center;pointer-events:none;}
+.dcenter b{font-size:1.6rem;display:block;line-height:1;text-shadow:0 4px 14px rgba(0,0,0,.7);}
+.dcenter small{font-size:.66rem;color:var(--mu);letter-spacing:.1em;text-transform:uppercase;}
+.dleg{display:grid;gap:8px;min-width:150px;font-size:.82rem;}
+.dleg div{display:flex;align-items:center;gap:8px;}
+.dleg i{width:12px;height:12px;border-radius:4px;flex:none;}
+.dleg b{margin-left:auto;padding-left:10px;}
+
+/* arrears / advance */
+.aa{display:grid;gap:14px;grid-template-columns:1fr;}
+@media(min-width:800px){.aa{grid-template-columns:1fr 1fr;}}
+.aa .tot{font-size:1.5rem;font-weight:800;margin:2px 0 8px;}
+.aa .tot.r{color:#ff8fa3;} .aa .tot.g{color:#6df0c1;}
+.lst{display:grid;gap:9px;max-height:340px;overflow:auto;padding-right:2px;}
+.it{padding:9px 11px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);}
+.it .t1{display:flex;justify-content:space-between;gap:8px;font-size:.86rem;}
+.it .t2{font-size:.7rem;color:var(--mu);margin-top:2px;}
+.it .meter{height:5px;border-radius:5px;background:rgba(255,255,255,.08);margin-top:7px;overflow:hidden;}
+.it .meter i{display:block;height:100%;border-radius:5px;width:0;transition:width 1.1s cubic-bezier(.2,.9,.3,1);}
+.none{color:var(--mu);font-size:.84rem;padding:14px 4px;text-align:center;}
+
+/* timeline */
+.tl{overflow-x:auto;}
+.tl-in{min-width:520px;}
+.tl-ax{position:relative;height:22px;margin-left:96px;}
+.tl-ax span{position:absolute;transform:translateX(-50%);font-size:.66rem;color:var(--mu);}
+.tl-row{display:flex;align-items:center;height:30px;}
+.tl-n{width:96px;flex:none;font-size:.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:8px;}
+.tl-t{position:relative;flex:1;height:100%;background:repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px var(--gs,60px));border-radius:6px;}
+.tl-b{position:absolute;top:6px;height:18px;border-radius:9px;background:linear-gradient(180deg,#7ea2ff,#4d6dff 55%,#3a4fe0);box-shadow:0 6px 14px rgba(77,109,255,.5),inset 0 1px 0 rgba(255,255,255,.5);
+  transform-origin:left;animation:grow .9s cubic-bezier(.2,.9,.3,1) both;display:flex;align-items:center;padding:0 8px;font-size:.62rem;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;}
+.tl-b.live{background:linear-gradient(180deg,#5af0bd,#1fcf93 55%,#12a873);box-shadow:0 6px 14px rgba(45,226,166,.5),inset 0 1px 0 rgba(255,255,255,.5);}
+.tl-b.live::after{content:"";position:absolute;right:0;top:0;bottom:0;width:26px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.65));animation:sweep 1.6s linear infinite;}
+@keyframes sweep{from{transform:translateX(-30px);opacity:0;}50%{opacity:1;}to{transform:translateX(10px);opacity:0;}}
+@keyframes grow{from{transform:scaleX(0);}to{transform:scaleX(1);}}
+.tl-dot{position:absolute;top:10px;width:10px;height:10px;border-radius:50%;background:var(--amb);transform:translateX(-50%);}
+
+/* technician cards */
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 2px 12px;}
+.search{flex:1 1 200px;position:relative;}
+.search input{width:100%;height:42px;border-radius:12px;border:1px solid var(--bd);background:var(--glass2);padding:0 12px 0 36px;outline:none;}
+.search input:focus{border-color:var(--blue);}
+.search::before{content:"🔍";position:absolute;left:11px;top:10px;font-size:.9rem;}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 4px;scrollbar-width:none;flex:1 1 100%;}
+.chips::-webkit-scrollbar{display:none;}
+.chip{flex:none;padding:7px 12px;border-radius:999px;border:1px solid var(--bd);background:var(--glass);font-size:.78rem;font-weight:700;cursor:pointer;display:inline-flex;gap:6px;align-items:center;}
+.chip em{font-style:normal;opacity:.75;font-size:.72rem;}
+.chip.on{background:linear-gradient(135deg,var(--vio),var(--blue));border-color:transparent;}
+.grid{display:grid;gap:14px;grid-template-columns:1fr;perspective:1400px;}
+@media(min-width:620px){.grid{grid-template-columns:repeat(2,1fr);}}
+@media(min-width:960px){.grid{grid-template-columns:repeat(3,1fr);}}
+@media(min-width:1280px){.grid{grid-template-columns:repeat(4,1fr);}}
+.fc{perspective:1100px;cursor:pointer;outline:none;}
+.fc:focus-visible .face{outline:2px solid var(--blue);}
+.fi{--rx:0deg;--ry:0deg;--fl:0deg;display:grid;transform-style:preserve-3d;transform:rotateX(var(--rx)) rotateY(calc(var(--ry) + var(--fl)));transition:transform .7s cubic-bezier(.2,.8,.2,1);}
+.fi.tilting{transition:transform .08s linear;}
+.fc.flipped .fi{--fl:180deg;}
+.face{grid-area:1/1;padding:14px;border-radius:18px;backface-visibility:hidden;-webkit-backface-visibility:hidden;position:relative;overflow:hidden;
+  background:linear-gradient(160deg,rgba(255,255,255,.1),rgba(255,255,255,.04));border:1px solid var(--bd);box-shadow:0 14px 34px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.12);}
+.face::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--sc,var(--grey));}
+.face.back{transform:rotateY(180deg);}
+.top{display:flex;align-items:center;gap:10px;}
+.av{width:46px;height:46px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:800;font-size:1.05rem;background:var(--ac,#4d6dff);box-shadow:0 8px 18px rgba(0,0,0,.45),0 0 0 2px rgba(255,255,255,.18);overflow:hidden;transform:translateZ(1px);}
+.av img{width:100%;height:100%;object-fit:cover;display:block;}
+.nm{min-width:0;flex:1;}
+.nm b{display:block;font-size:.98rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.nm small{color:var(--mu);font-size:.72rem;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.st{flex:none;font-size:.68rem;font-weight:800;padding:5px 9px;border-radius:999px;letter-spacing:.04em;background:color-mix(in srgb,var(--sc) 20%,transparent);color:var(--sc);border:1px solid color-mix(in srgb,var(--sc) 55%,transparent);}
+@supports not (background:color-mix(in srgb,red,blue)){.st{background:rgba(255,255,255,.1);border:1px solid var(--sc);}}
+.st.working::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--sc);margin-right:5px;animation:pulse 1.6s infinite;vertical-align:1px;}
+.tm{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;}
+.tm div,.mn div{background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:8px 9px;}
+.tm label,.mn label,.kv label{display:block;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mu);font-weight:700;}
+.tm b{font-size:1rem;display:block;margin-top:2px;}
+.mn{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+.mn b{font-size:.92rem;display:block;margin-top:2px;}
+.mn .tot{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(90deg,rgba(91,141,255,.22),rgba(45,226,166,.16));}
+.mn .tot b{font-size:1.15rem;margin:0;}
+.pbar{height:7px;border-radius:7px;background:rgba(255,255,255,.1);margin-top:10px;overflow:hidden;}
+.pbar i{display:block;height:100%;width:var(--p,0%);border-radius:7px;background:linear-gradient(90deg,var(--grn),var(--blue));transition:width 1s cubic-bezier(.2,.9,.3,1);}
+.pl{font-size:.7rem;color:var(--mu);margin-top:5px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.pl .u{color:#ffd36b;font-weight:700;} .pl .o{color:#6df0c1;font-weight:700;} .pl .k{color:#6df0c1;font-weight:700;}
+.bd{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px;min-height:4px;}
+.bd span{font-size:.66rem;font-weight:800;padding:3px 8px;border-radius:8px;border:1px solid var(--bd);}
+.bd .etf{color:#c8b8ff;border-color:rgba(139,107,255,.6);} .bd .ar{color:#ff9fb0;border-color:rgba(255,93,122,.6);} .bd .ad{color:#6df0c1;border-color:rgba(45,226,166,.6);} .bd .hf{color:#ffd36b;border-color:rgba(255,183,3,.6);}
+.flip-h{position:absolute;right:11px;bottom:8px;font-size:.62rem;color:var(--mu);opacity:.7;}
+.kv{display:grid;gap:7px;margin-top:10px;}
+.kv div{display:flex;justify-content:space-between;gap:10px;font-size:.8rem;padding:6px 9px;border-radius:10px;background:rgba(0,0,0,.2);align-items:baseline;}
+.kv div span{text-align:right;}
+.kv .h{background:none;padding:2px 2px 0;color:var(--mu);font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;font-weight:800;}
+.pos{color:#6df0c1;font-weight:700;} .neg{color:#ff9fb0;font-weight:700;} .wr{color:#ffd36b;font-weight:700;}
+.note{margin-top:8px;font-size:.74rem;color:#cdd6f6;background:rgba(255,255,255,.06);border-radius:10px;padding:7px 9px;}
+.empty{grid-column:1/-1;text-align:center;color:var(--mu);padding:34px 10px;}
+.skel{height:190px;border-radius:18px;background:linear-gradient(100deg,rgba(255,255,255,.04) 30%,rgba(255,255,255,.12) 50%,rgba(255,255,255,.04) 70%);background-size:300% 100%;animation:shim 1.4s linear infinite;border:1px solid var(--bd);}
+@keyframes shim{from{background-position:100% 0;}to{background-position:-100% 0;}}
+footer{margin:30px 4px 0;text-align:center;color:var(--mu);font-size:.72rem;line-height:1.6;}
+@media(prefers-reduced-motion:reduce){
+  .floor,.fcube,.ring3d,.logo,.kpi .ic,.kw,.tl-b,.dot,.st.working::before{animation:none !important;}
+  .cube,.grp .val,.pbar i,.it .meter i,.fi,.kpi{transition:none !important;}
+  .ring3d{transform:rotateX(60deg);}
+}
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true">
+  <div class="floor"></div>
+  <div class="fcube" style="--s:46px;width:46px;height:46px;left:6%;top:22%;animation-duration:22s"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="fcube" style="--s:30px;width:30px;height:30px;left:88%;top:16%;animation-duration:17s"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="fcube" style="--s:64px;width:64px;height:64px;left:80%;top:60%;animation-duration:30s;opacity:.35"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="fcube" style="--s:26px;width:26px;height:26px;left:14%;top:64%;animation-duration:15s"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="fcube" style="--s:38px;width:38px;height:38px;left:48%;top:8%;animation-duration:26s;opacity:.35"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+</div>
+
+<div class="wrap">
+  <!-- header -->
+  <header class="hd gl">
+    <div class="hd-top">
+      <div class="logo">💎</div>
+      <div class="ttl"><b>Salary Control Room</b><small>Boss view · live from the system</small></div>
+      <span class="ro" title="This page can only read data. Nothing can be changed here.">🔒 Read only</span>
+      <div class="clock"><b id="clk">--:--:--</b><small id="clkd"></small></div>
+    </div>
+    <div class="hd-bot">
+      <div class="dnav">
+        <button class="ib" id="prev" aria-label="Previous day">‹</button>
+        <input type="date" id="dayIn" aria-label="Date" />
+        <button class="ib" id="next" aria-label="Next day">›</button>
+        <button class="pill" id="today">Today</button>
+      </div>
+      <div class="upd"><span class="dot" id="dot"></span><span id="updTxt">Loading…</span><button class="ib" id="refresh" aria-label="Refresh now" style="width:34px;height:34px;border-radius:10px;font-size:.95rem;">⟳</button></div>
+    </div>
+    <div class="cd"><i id="cdBar"></i></div>
+  </header>
+  <div class="banner hidden" id="banner"></div>
+  <div class="alerts" id="alerts"></div>
+
+  <!-- KPIs -->
+  <div class="kgrid" id="kgrid">
+    <div class="kw" style="--i:0"><div class="kpi gl tilt" style="--c:#5b8dff"><span class="ic">💵</span><div class="lb">Total cost today</div><div class="vl" id="k1">Rs. 0.00</div><div class="sb" id="k1s">salary + transport</div><i class="bar"></i></div></div>
+    <div class="kw" style="--i:1"><div class="kpi gl tilt" style="--c:#8b6bff"><span class="ic">👷</span><div class="lb">Daily salary</div><div class="vl" id="k2">Rs. 0.00</div><div class="sb" id="k2s">earned today</div><i class="bar"></i></div></div>
+    <div class="kw" style="--i:2"><div class="kpi gl tilt" style="--c:#2de2a6"><span class="ic">🚌</span><div class="lb">Transport cost</div><div class="vl" id="k3">Rs. 0.00</div><div class="sb" id="k3s">earned today</div><i class="bar"></i></div></div>
+    <div class="kw" style="--i:3"><div class="kpi gl tilt" style="--c:#4cc9f0"><span class="ic">✅</span><div class="lb">Paid today</div><div class="vl" id="k4">Rs. 0.00</div><div class="sb" id="k4s">&nbsp;</div><i class="bar"></i></div></div>
+    <div class="kw" style="--i:4"><div class="kpi gl tilt" style="--c:#2de2a6"><span class="ic">🟢</span><div class="lb">Working now</div><div class="vl" id="k5">0</div><div class="sb" id="k5s">&nbsp;</div><i class="bar"></i></div></div>
+    <div class="kw" style="--i:5"><div class="kpi gl tilt" style="--c:#ff5d7a"><span class="ic">⚠️</span><div class="lb">Arrears outstanding</div><div class="vl" id="k6">Rs. 0.00</div><div class="sb" id="k6s">brought forward</div><i class="bar"></i></div></div>
+    <div class="kw" style="--i:6"><div class="kpi gl tilt" style="--c:#ffb703"><span class="ic">💰</span><div class="lb">Advance (overpaid)</div><div class="vl" id="k7">Rs. 0.00</div><div class="sb" id="k7s">brought forward</div><i class="bar"></i></div></div>
+    <div class="kw" style="--i:7"><div class="kpi gl tilt" style="--c:#ff7ad9"><span class="ic">📅</span><div class="lb">This month</div><div class="vl" id="k8">Rs. 0.00</div><div class="sb" id="k8s">&nbsp;</div><i class="bar"></i></div></div>
+  </div>
+  <div class="strip" id="strip"></div>
+
+  <!-- charts -->
+  <h2 class="sec">Trends &amp; attendance</h2>
+  <div class="row2">
+    <section class="pn gl">
+      <h3>Last 7 days — salary &amp; transport cost</h3>
+      <div class="sub">Drag to rotate · tap a bar to open that day</div>
+      <div class="chart" id="chart"><div class="scene" id="scene"><div class="cfloor"></div><div class="brow" id="brow"></div></div></div>
+      <div class="legend"><span><i style="background:#5b8dff"></i>Salary</span><span><i style="background:#2de2a6"></i>Transport</span></div>
+    </section>
+    <section class="pn gl">
+      <h3>Attendance</h3>
+      <div class="sub" id="dsub">&nbsp;</div>
+      <div class="dwrap">
+        <div class="donut"><div class="ring3d" id="ring"></div><div class="dcenter"><div><b id="dc1">0</b><small id="dc2">present</small></div></div></div>
+        <div class="dleg" id="dleg"></div>
+      </div>
+    </section>
+  </div>
+
+  <h2 class="sec">In &amp; out times</h2>
+  <section class="pn gl"><div class="tl"><div class="tl-in" id="tl"></div></div></section>
+
+  <h2 class="sec">Arrears &amp; advance</h2>
+  <div class="aa">
+    <section class="pn gl"><h3>⚠ Arrears outstanding</h3><div class="sub" id="arSub">before this date</div><div class="tot r" id="arTot">Rs. 0.00</div><div class="lst" id="arLst"></div></section>
+    <section class="pn gl"><h3>💰 Advance (overpaid)</h3><div class="sub" id="adSub">before this date</div><div class="tot g" id="adTot">Rs. 0.00</div><div class="lst" id="adLst"></div></section>
+  </div>
+
+  <h2 class="sec">Technicians</h2>
+  <div class="tools">
+    <div class="search"><input id="q" type="search" placeholder="Search name, designation, employee no…" autocomplete="off" /></div>
+    <div class="chips" id="chips"></div>
+  </div>
+  <div class="grid" id="grid"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+
+  <footer>🔒 Read-only dashboard — it can view salary records but cannot add, edit or delete anything.<br /><span id="foot"></span></footer>
+</div>
+
+<script>
+const EDGE_FUNCTION_URL = "https://acdyletpjdmrqddylgcn.supabase.co/functions/v1/smart-responder";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFjZHlsZXRwamRtcnFkZHlsZ2NuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4MDA2NTUsImV4cCI6MjEwNTM3NjY1NX0.2JaoROSxmbbo1Dah-oiBqKULru1Gz8koL0wBlMJbEyI";
+const DEMO = /[?&]demo(=1)?(&|$)/.test(location.search);       // ?demo=1 shows sample data (no server needed)
+const REFRESH_MS = 60000;
+const reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- READ-ONLY API: only these backend functions can ever be called from this page ---------- */
+const READ_ONLY = new Set(['listTechnicians', 'listSalaryEntries', 'listSalaryBalances', 'listEtfMembers', 'getFileDataUrl']);
+function api(fn, ...args){
+  if(!READ_ONLY.has(fn)) return Promise.reject(new Error('This dashboard is read-only.'));
+  if(DEMO) return new Promise(res => setTimeout(() => res(demoApi(fn, args)), 220));
+  const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 25000);
+  return fetch(EDGE_FUNCTION_URL, {
+    method:'POST', headers:{ 'Content-Type':'application/json', 'apikey':SUPABASE_ANON_KEY, 'Authorization':'Bearer ' + SUPABASE_ANON_KEY },
+    body: JSON.stringify({ fn, args }), signal: ctl.signal
+  }).catch(() => { throw new Error('No connection to the server.'); })
+    .then(r => r.json()).then(d => { if(!d.ok) throw new Error(d.error || 'Request failed.'); return d.result; })
+    .finally(() => clearTimeout(timer));
+}
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const EPS = 0.005;
+const esc = v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rs = n => 'Rs. ' + Number(n || 0).toLocaleString(undefined, { minimumFractionDigits:2, maximumFractionDigits:2 });
+const kfmt = n => { n = Number(n || 0); return n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(n >= 1e4 ? 0 : 1) + 'k' : String(Math.round(n)); };
+const p2 = n => String(n).padStart(2, '0');
+const ymd = d => d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate());
+const addDays = (s, n) => { const d = new Date(s + 'T00:00:00'); d.setDate(d.getDate() + n); return ymd(d); };
+const niceDate = s => new Date(s + 'T00:00:00').toLocaleDateString([], { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+const t5 = v => v ? String(v).slice(0, 5) : '';
+const mins = t => { if(!t) return null; const a = t.split(':').map(Number); return a[0] * 60 + a[1]; };
+const durMin = (a, b) => { let m = mins(b) - mins(a); if(m < 0) m += 1440; return m; };
+const hTxt = m => Math.floor(m / 60) + 'h ' + p2(m % 60) + 'm';
+const nowMin = () => { const d = new Date(); return d.getHours() * 60 + d.getMinutes(); };
+const num = v => Number(v) || 0;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const initials = n => String(n || '?').trim().split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+const AV_COLORS = ['#4d6dff','#8b6bff','#17b890','#e0568f','#e08a1e','#2aa1d6','#c04cd9','#d9534f'];
+const avColor = id => { let h = 0; String(id).split('').forEach(c => { h = (h * 31 + c.charCodeAt(0)) >>> 0; }); return AV_COLORS[h % AV_COLORS.length]; };
+
+/* ---------- state ---------- */
+let day = ymd(new Date()), techs = [], ex = {}, bal = {}, etfSet = new Set(), byDay = {}, monthT = {};
+let F = { f:'all', q:'' }, busy = false, loadTok = 0, lastOk = 0, photos = {}, photoQueue = false;
+const todayStr = () => ymd(new Date());
+const isToday = () => day === todayStr();
+
+/* =====================================================================
+ * clock
+ * ===================================================================== */
+function tick(){
+  const d = new Date();
+  $('clk').textContent = p2(d.getHours()) + ':' + p2(d.getMinutes()) + ':' + p2(d.getSeconds());
+  $('clkd').textContent = d.toLocaleDateString([], { weekday:'short', day:'numeric', month:'short' });
+}
+setInterval(tick, 1000); tick();
+
+/* =====================================================================
+ * 3D tilt (mouse only - touch keeps normal scrolling)
+ * ===================================================================== */
+function bindTilt(root){
+  root.addEventListener('pointermove', e => {
+    if(e.pointerType !== 'mouse' || reduced) return;
+    const el = e.target.closest('.tilt'); if(!el) return;
+    const r = el.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    el.classList.add('tilting');
+    el.style.setProperty('--ry', ((x - .5) * 14).toFixed(2) + 'deg');
+    el.style.setProperty('--rx', ((.5 - y) * 12).toFixed(2) + 'deg');
+    el.style.setProperty('--gx', (x * 100) + '%'); el.style.setProperty('--gy', (y * 100) + '%'); el.style.setProperty('--go', '1');
+  });
+  root.addEventListener('pointerout', e => {
+    const el = e.target.closest && e.target.closest('.tilt'); if(!el || el.contains(e.relatedTarget)) return;
+    el.classList.remove('tilting'); el.style.setProperty('--ry', '0deg'); el.style.setProperty('--rx', '0deg'); el.style.setProperty('--go', '0');
+  });
+}
+bindTilt($('kgrid')); bindTilt($('grid'));
+
+/* =====================================================================
+ * count-up numbers
+ * ===================================================================== */
+function countTo(el, to, fmt){
+  const from = Number(el.dataset.v || 0); el.dataset.v = to;
+  cancelAnimationFrame(el._raf);
+  if(reduced || from === to){ el.textContent = fmt(to); return; }
+  const t0 = performance.now(), dur = 950;
+  const step = now => { const k = clamp((now - t0) / dur, 0, 1), e = 1 - Math.pow(1 - k, 3); el.textContent = fmt(from + (to - from) * e); if(k < 1) el._raf = requestAnimationFrame(step); else el.textContent = fmt(to); };
+  el._raf = requestAnimationFrame(step);
+}
+
+/* =====================================================================
+ * data load
+ * ===================================================================== */
+function setStatus(kind, text){
+  $('dot').className = 'dot ' + (kind || ''); $('updTxt').textContent = text;
+}
+function restartCountdown(){
+  const b = $('cdBar'); b.classList.remove('run'); void b.offsetWidth;
+  if(isToday()){ b.style.setProperty('--cdur', (REFRESH_MS / 1000) + 's'); b.classList.add('run'); }
+}
+function showBanner(msg){ const b = $('banner'); if(msg){ b.textContent = msg; b.classList.remove('hidden'); } else b.classList.add('hidden'); }
+
+async function load(manual){
+  if(busy) return; busy = true;
+  const tok = ++loadTok, myDay = day;
+  setStatus('busy', 'Updating…');
+  try{
+    if(!techs.length || manual){
+      const all = await api('listTechnicians');
+      techs = (all || []).filter(t => t.active && t.role !== 'admin').sort((a, b) => String(a.name).localeCompare(String(b.name)));
+    }
+    const mStart = myDay.slice(0, 8) + '01', d6 = addDays(myDay, -6), from = mStart < d6 ? mStart : d6;
+    const [list, balances, etf] = await Promise.all([
+      api('listSalaryEntries', null, from, myDay),
+      api('listSalaryBalances', myDay).catch(() => []),
+      api('listEtfMembers').catch(() => [])
+    ]);
+    if(tok !== loadTok || myDay !== day) { busy = false; return; }          // user changed the date meanwhile
+    etfSet = new Set((etf || []).map(String));
+    bal = {}; (balances || []).forEach(b => { bal[String(b.id)] = { s:num(b.salary_arrears), t:num(b.transport_arrears) }; });
+    ex = {}; byDay = {}; monthT = {};
+    (list || []).forEach(e => {
+      const d = String(e.entry_date).slice(0, 10), id = String(e.technician_id);
+      const g = byDay[d] = byDay[d] || { sd:0, td:0, sp:0, tp:0, n:0 };
+      g.sd += num(e.salary_due); g.td += num(e.transport_due); g.sp += num(e.salary_paid); g.tp += num(e.transport_paid); g.n++;
+      if(d === myDay) ex[id] = e;
+      if(d >= mStart){
+        const m = monthT[id] = monthT[id] || { days:0, earned:0, paid:0 };
+        if(e.attendance === 'present' || e.attendance === 'half_day') m.days++;
+        m.earned += num(e.salary_due) + num(e.transport_due); m.paid += num(e.salary_paid) + num(e.transport_paid);
+      }
+    });
+    lastOk = Date.now(); showBanner('');
+    renderAll();
+    const d = new Date();
+    setStatus(isToday() ? '' : 'past', (isToday() ? 'Live · updated ' : 'Updated ') + p2(d.getHours()) + ':' + p2(d.getMinutes()) + ':' + p2(d.getSeconds()));
+    $('foot').textContent = 'Showing ' + niceDate(myDay) + (isToday() ? ' · refreshes automatically every minute' : '');
+  }catch(e){
+    setStatus('err', lastOk ? 'Offline · last update ' + new Date(lastOk).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' }) : 'Could not load');
+    showBanner(lastOk ? '⚠ Connection problem — showing the last data received. Retrying automatically…' : '⚠ Could not load data: ' + e.message);
+    if(!lastOk) $('grid').innerHTML = '<div class="empty">Could not load: ' + esc(e.message) + '<br><br><button class="pill" onclick="load(true)">Try again</button></div>';
+  }
+  busy = false; restartCountdown();
+}
+setInterval(() => { if(!document.hidden && isToday()) load(); }, REFRESH_MS);
+document.addEventListener('visibilitychange', () => { if(!document.hidden && Date.now() - lastOk > 30000) load(); });
+
+/* =====================================================================
+ * derived values
+ * ===================================================================== */
+function statusOf(e){
+  if(!e) return 'none';
+  if(e.attendance === 'absent') return 'absent';
+  if(e.attendance === 'leave') return 'leave';
+  if(e.time_out) return 'off';
+  return 'working';
+}
+const ST = {
+  working:{ label:'Working', color:'#2de2a6' }, off:{ label:'Checked out', color:'#4cc9f0' }, none:{ label:'Not updated', color:'#ffb703' },
+  absent:{ label:'Absent', color:'#ff5d7a' }, leave:{ label:'On leave', color:'#8b95b3' }
+};
+function dayTotals(){
+  const t = { sd:0, td:0, sp:0, tp:0, etf:0, setl:0, mins:0, counts:{ working:0, off:0, none:0, absent:0, leave:0 } };
+  techs.forEach(x => {
+    const e = ex[String(x.id)], st = statusOf(e); t.counts[st]++;
+    if(!e) return;
+    t.sd += num(e.salary_due); t.td += num(e.transport_due); t.sp += num(e.salary_paid); t.tp += num(e.transport_paid);
+    t.etf += num(e.etf_deduction); t.setl += num(e.arrears_salary_paid) + num(e.arrears_transport_paid);
+    if(e.time_in && e.time_out) t.mins += durMin(t5(e.time_in), t5(e.time_out));
+    else if(e.time_in && isToday() && st === 'working') t.mins += durMin(t5(e.time_in), p2(Math.floor(nowMin() / 60)) + ':' + p2(nowMin() % 60));
+  });
+  return t;
+}
+function balTotals(){
+  let ar = 0, ad = 0, arN = 0, adN = 0; const arR = [], adR = [];
+  techs.forEach(t => {
+    const b = bal[String(t.id)] || { s:0, t:0 };
+    const as = Math.max(b.s, 0), at = Math.max(b.t, 0), ds = Math.max(-b.s, 0), dt = Math.max(-b.t, 0);
+    if(as + at > EPS){ ar += as + at; arN++; arR.push({ name:t.name, s:as, t:at, tot:as + at }); }
+    if(ds + dt > EPS){ ad += ds + dt; adN++; adR.push({ name:t.name, s:ds, t:dt, tot:ds + dt }); }
+  });
+  arR.sort((a, b) => b.tot - a.tot); adR.sort((a, b) => b.tot - a.tot);
+  return { ar, ad, arN, adN, arR, adR };
+}
+
+/* =====================================================================
+ * render
+ * ===================================================================== */
+function renderAll(){
+  $('dayIn').value = day; $('dayIn').max = todayStr(); $('next').disabled = isToday(); $('next').style.opacity = isToday() ? .4 : 1;
+  $('today').classList.toggle('on', isToday());
+  const T = dayTotals(), B = balTotals();
+  renderAlerts(T, B); renderKpis(T, B); renderDonut(T); renderBars(); renderArrears(B); renderTimeline(); renderChips(B); renderCards(B);
+  loadPhotos();
+}
+
+function renderAlerts(T, B){
+  const a = [];
+  if(T.counts.working) a.push(`<span class="al g">🟢 ${T.counts.working} working now</span>`);
+  if(T.counts.none) a.push(`<span class="al w">❓ ${T.counts.none} not updated yet</span>`);
+  if(T.counts.absent) a.push(`<span class="al r">🚫 ${T.counts.absent} absent</span>`);
+  if(B.ar > EPS) a.push(`<span class="al r">⚠ ${rs(B.ar)} arrears · ${B.arN} technician${B.arN === 1 ? '' : 's'}</span>`);
+  if(B.ad > EPS) a.push(`<span class="al b">💰 ${rs(B.ad)} advance · ${B.adN} technician${B.adN === 1 ? '' : 's'}</span>`);
+  if(!a.length) a.push('<span class="al g">✔ Everything is up to date</span>');
+  $('alerts').innerHTML = a.join('');
+}
+
+function renderKpis(T, B){
+  const earned = T.sd + T.td, paid = T.sp + T.tp, mo = monthTotals();
+  countTo($('k1'), earned, rs); $('k1s').textContent = 'salary + transport · ' + (T.counts.working + T.counts.off) + ' present';
+  countTo($('k2'), T.sd, rs); $('k2s').textContent = 'paid ' + rs(T.sp);
+  countTo($('k3'), T.td, rs); $('k3s').textContent = 'paid ' + rs(T.tp);
+  countTo($('k4'), paid, rs);
+  const un = earned - paid;
+  $('k4s').innerHTML = un > EPS ? 'unpaid <b style="color:#ffd36b">' + rs(un) + '</b>' : un < -EPS ? 'overpaid <b style="color:#6df0c1">' + rs(-un) + '</b>' : 'all settled ✓';
+  countTo($('k5'), T.counts.working, v => String(Math.round(v))); $('k5s').textContent = 'of ' + techs.length + ' · ' + T.counts.off + ' checked out';
+  countTo($('k6'), B.ar, rs); $('k6s').textContent = B.arN ? B.arN + ' technician' + (B.arN === 1 ? '' : 's') + ' · before this date' : 'nothing outstanding ✓';
+  countTo($('k7'), B.ad, rs); $('k7s').textContent = B.adN ? B.adN + ' technician' + (B.adN === 1 ? '' : 's') + ' · before this date' : 'none';
+  countTo($('k8'), mo.earned, rs); $('k8s').textContent = 'paid ' + rs(mo.paid) + ' · ' + new Date(day + 'T00:00:00').toLocaleDateString([], { month:'long' });
+  const s = [];
+  s.push('<span>⏱ Hours logged <b>' + (T.mins ? hTxt(T.mins) : '—') + '</b></span>');
+  if(T.etf > EPS) s.push('<span>🏦 ETF deducted <b>' + rs(T.etf) + '</b></span>');
+  if(T.setl > EPS) s.push('<span>💳 Arrears settled <b>' + rs(T.setl) + '</b></span>');
+  s.push('<span>👥 Team <b>' + techs.length + '</b></span>');
+  $('strip').innerHTML = s.join('');
+}
+function monthTotals(){
+  const mStart = day.slice(0, 8) + '01'; let earned = 0, paid = 0;
+  Object.keys(byDay).forEach(d => { if(d >= mStart && d <= day){ earned += byDay[d].sd + byDay[d].td; paid += byDay[d].sp + byDay[d].tp; } });
+  return { earned, paid };
+}
+
+/* ---------- 3D donut ---------- */
+function renderDonut(T){
+  const order = ['working', 'off', 'none', 'absent', 'leave'], n = techs.length || 1;
+  let acc = 0; const stops = [];
+  order.forEach(k => { const c = T.counts[k]; if(!c) return; const a = acc / n * 360, b = (acc + c) / n * 360; stops.push(ST[k].color + ' ' + a.toFixed(2) + 'deg ' + b.toFixed(2) + 'deg'); acc += c; });
+  const g = techs.length ? 'conic-gradient(' + stops.join(',') + ')' : 'conic-gradient(#39425f 0 360deg)';
+  let html = ''; for(let i = 0; i < 12; i++) html += '<div class="rl" style="--g:' + g + ';transform:translateZ(' + (-i * 2.2).toFixed(1) + 'px);filter:brightness(' + (1 - i * .045).toFixed(3) + ')"></div>';
+  html += '<div class="rl" style="--g:' + g + ';transform:translateZ(3px)"></div>';
+  $('ring').innerHTML = html;
+  const present = T.counts.working + T.counts.off;
+  countTo($('dc1'), present, v => Math.round(v) + '/' + techs.length); $('dc2').textContent = 'present';
+  $('dsub').textContent = niceDate(day);
+  $('dleg').innerHTML = order.map(k => `<div><i style="background:${ST[k].color}"></i>${ST[k].label}<b>${T.counts[k]}</b></div>`).join('');
+}
+
+/* ---------- 3D bar chart (last 7 days) ---------- */
+const CH = { ry:0, drag:null, moved:0, built:false };
+function renderBars(){
+  const days = []; for(let i = 6; i >= 0; i--) days.push(addDays(day, -i));
+  const vals = days.map(d => byDay[d] || { sd:0, td:0 });
+  const max = Math.max(1, ...vals.map(v => Math.max(v.sd, v.td))), H = 150;
+  const row = $('brow'), first = !row.children.length;
+  if(first){
+    row.innerHTML = days.map(d => {
+      const dt = new Date(d + 'T00:00:00');
+      return `<div class="grp" data-d="${d}"><div class="cube sal" style="--h:2px"><i class="f"></i><i class="b"></i><i class="l"></i><i class="r"></i><i class="t"></i></div><div class="cube trn" style="--h:2px"><i class="f"></i><i class="b"></i><i class="l"></i><i class="r"></i><i class="t"></i></div><span class="val"></span><span class="lab"><b>${dt.toLocaleDateString([], { weekday:'short' })}</b>${dt.getDate()}</span></div>`;
+    }).join('');
+  }else{
+    row.querySelectorAll('.grp').forEach((g, i) => { g.dataset.d = days[i]; const dt = new Date(days[i] + 'T00:00:00'); g.querySelector('.lab').innerHTML = `<b>${dt.toLocaleDateString([], { weekday:'short' })}</b>${dt.getDate()}`; });
+  }
+  const apply = () => row.querySelectorAll('.grp').forEach((g, i) => {
+    const v = vals[i], hs = Math.max(2, v.sd / max * H), ht = Math.max(2, v.td / max * H);
+    g.classList.toggle('sel', days[i] === day);
+    g.querySelector('.cube.sal').style.setProperty('--h', hs + 'px'); g.querySelector('.cube.trn').style.setProperty('--h', ht + 'px');
+    g.style.setProperty('--vb', Math.max(hs, ht) + 'px');
+    g.querySelector('.val').textContent = (v.sd + v.td) > EPS ? kfmt(v.sd + v.td) : '';
+    g.title = niceDate(days[i]) + '\nSalary ' + rs(v.sd) + '\nTransport ' + rs(v.td);
+  });
+  if(first && !reduced) setTimeout(apply, 60); else apply();
+}
+(function bindChart(){
+  const chart = $('chart'), scene = $('scene');
+  chart.addEventListener('pointerdown', e => { CH.drag = { x:e.clientX, ry:CH.ry }; CH.moved = 0; });
+  window.addEventListener('pointermove', e => { if(!CH.drag) return; const dx = e.clientX - CH.drag.x; CH.moved = Math.max(CH.moved, Math.abs(dx)); CH.ry = clamp(CH.drag.ry + dx * .4, -55, 55); });
+  const end = () => { CH.drag = null; }; window.addEventListener('pointerup', end); window.addEventListener('pointercancel', end);
+  chart.addEventListener('click', e => {
+    if(CH.moved > 6) return;
+    const g = e.target.closest('.grp'); if(g && g.dataset.d && g.dataset.d !== day) goTo(g.dataset.d);
+  });
+  if(reduced) return;
+  (function loop(t){ const sway = CH.drag ? 0 : Math.sin(t / 2600) * 11; scene.style.setProperty('--ry', (CH.ry + sway).toFixed(2) + 'deg'); requestAnimationFrame(loop); })(0);
+})();
+
+/* ---------- arrears / advance ---------- */
+function renderArrears(B){
+  countTo($('arTot'), B.ar, rs); countTo($('adTot'), B.ad, rs);
+  $('arSub').textContent = 'brought forward before ' + niceDate(day); $('adSub').textContent = 'overpaid before ' + niceDate(day);
+  const list = (rows, cls, color, empty) => rows.length ? rows.map(r => `<div class="it"><div class="t1"><b>${esc(r.name)}</b><b class="${cls}">${rs(r.tot)}</b></div><div class="t2">${[r.s > EPS ? 'salary ' + rs(r.s) : '', r.t > EPS ? 'transport ' + rs(r.t) : ''].filter(Boolean).join(' · ')}</div><div class="meter"><i data-w="${(r.tot / rows[0].tot * 100).toFixed(1)}" style="background:${color}"></i></div></div>`).join('') : `<div class="none">${empty}</div>`;
+  $('arLst').innerHTML = list(B.arR, 'neg', 'linear-gradient(90deg,#ff5d7a,#ff9a6b)', '✔ No outstanding arrears');
+  $('adLst').innerHTML = list(B.adR, 'pos', 'linear-gradient(90deg,#2de2a6,#4cc9f0)', 'No advances');
+  requestAnimationFrame(() => setTimeout(() => document.querySelectorAll('.meter i').forEach(i => { i.style.width = i.dataset.w + '%'; }), 30));
+}
+
+/* ---------- in/out timeline ---------- */
+function renderTimeline(){
+  const rows = techs.map(t => ({ t, e:ex[String(t.id)] })).filter(r => r.e && r.e.time_in && (r.e.attendance === 'present' || r.e.attendance === 'half_day'));
+  const el = $('tl');
+  if(!rows.length){ el.innerHTML = '<div class="none">No in/out times recorded for this date.</div>'; return; }
+  const live = isToday(), now = nowMin();
+  let lo = 24 * 60, hi = 0;
+  rows.forEach(r => { const a = mins(t5(r.e.time_in)); let b = r.e.time_out ? mins(t5(r.e.time_out)) : (live ? now : a + 60); if(b < a) b = 1440; lo = Math.min(lo, a); hi = Math.max(hi, b); });
+  lo = Math.max(0, Math.floor((lo - 30) / 60) * 60); hi = Math.min(1440, Math.ceil((hi + 30) / 60) * 60); if(hi - lo < 240) hi = Math.min(1440, lo + 240);
+  const span = hi - lo, step = span > 600 ? 120 : 60, ticks = [];
+  for(let m = lo; m <= hi; m += step) ticks.push(m);
+  const pc = m => ((m - lo) / span * 100).toFixed(2);
+  const axis = '<div class="tl-ax">' + ticks.map(m => `<span style="left:${pc(m)}%">${p2(Math.floor(m / 60) % 24)}:00</span>`).join('') + '</div>';
+  const gs = (step / span * 100).toFixed(3) + '%';
+  const body = rows.sort((a, b) => mins(t5(a.e.time_in)) - mins(t5(b.e.time_in))).map(r => {
+    const a = mins(t5(r.e.time_in)), working = !r.e.time_out;
+    let b = r.e.time_out ? mins(t5(r.e.time_out)) : (live ? now : a); if(b < a) b = 1440;
+    const w = Math.max(b - a, 0), label = r.e.time_out ? t5(r.e.time_in) + ' → ' + t5(r.e.time_out) + ' · ' + hTxt(durMin(t5(r.e.time_in), t5(r.e.time_out))) : (live ? t5(r.e.time_in) + ' → now · ' + hTxt(Math.max(0, now - a)) : t5(r.e.time_in) + ' → ?');
+    const bar = (w < 6 && working && !live) ? `<span class="tl-dot" style="left:${pc(a)}%"></span>` : `<div class="tl-b ${working && live ? 'live' : ''}" style="left:${pc(a)}%;width:${Math.max(w / span * 100, 1.2)}%">${w / span > .12 ? esc(label) : ''}</div>`;
+    return `<div class="tl-row" title="${esc(r.t.name)} · ${esc(label)}"><div class="tl-n">${esc(r.t.name)}</div><div class="tl-t" style="--gs:${gs}">${bar}</div></div>`;
+  }).join('');
+  el.innerHTML = axis + body;
+}
+
+/* ---------- filter chips ---------- */
+const CHIP_DEF = [['all', 'All'], ['working', 'Working'], ['off', 'Checked out'], ['none', 'Not updated'], ['absent', 'Absent'], ['leave', 'On leave'], ['arrears', 'Arrears'], ['advance', 'Advance']];
+function rowsAll(){ return techs.map(t => { const id = String(t.id); return { t, id, e:ex[id], st:statusOf(ex[id]), b:bal[id] || { s:0, t:0 } }; }); }
+function passes(r){
+  if(F.q){ const q = F.q.toLowerCase(); if(!(String(r.t.name).toLowerCase().includes(q) || String(r.t.designation || '').toLowerCase().includes(q) || String(r.t.employee_no || '').toLowerCase().includes(q))) return false; }
+  switch(F.f){ case 'all': return true; case 'arrears': return r.b.s > EPS || r.b.t > EPS; case 'advance': return r.b.s < -EPS || r.b.t < -EPS; default: return r.st === F.f; }
+}
+function renderChips(){
+  const rows = rowsAll(), cnt = f => f === 'all' ? rows.length : rows.filter(r => passes({ ...r, t:{ name:'' } }) ).length;
+  const count = f => { const keep = F.f, kq = F.q; F.f = f; F.q = ''; const n = rows.filter(passes).length; F.f = keep; F.q = kq; return n; };
+  $('chips').innerHTML = CHIP_DEF.map(([f, l]) => `<button type="button" class="chip ${F.f === f ? 'on' : ''}" data-f="${f}">${l} <em>${count(f)}</em></button>`).join('');
+}
+$('chips').addEventListener('click', e => { const b = e.target.closest('.chip'); if(!b) return; F.f = b.dataset.f; renderChips(); renderCards(); });
+$('q').addEventListener('input', e => { F.q = e.target.value.trim(); renderChips(); renderCards(); });
+
+/* ---------- technician flip cards ---------- */
+const ORDER = { working:0, off:1, none:2, absent:3, leave:4 };
+function moneyRow(label, due, paid){
+  const d = +(due - paid).toFixed(2);
+  const st = (!due && !paid) ? '' : d > EPS ? `<span class="wr">${rs(d)} unpaid</span>` : d < -EPS ? `<span class="pos">${rs(-d)} overpaid</span>` : `<span class="pos">paid ✓</span>`;
+  return `<div><b>${label}</b><span>${rs(due)} <small style="color:var(--mu)">· paid ${rs(paid)}</small><br>${st}</span></div>`;
+}
+function cardInner(r){
+  const { t, e, st, b } = r, id = r.id, S = ST[st], isEtf = etfSet.has(id) || (e && num(e.etf_deduction) > 0);
+  const sd = e ? num(e.salary_due) : 0, td = e ? num(e.transport_due) : 0, sp = e ? num(e.salary_paid) : 0, tp = e ? num(e.transport_paid) : 0;
+  const earned = sd + td, paid = sp + tp, un = earned - paid, pct = earned > EPS ? clamp(paid / earned * 100, 0, 100) : 0;
+  const tin = e ? t5(e.time_in) : '', tout = e ? t5(e.time_out) : '';
+  let worked = '—';
+  if(tin && tout) worked = hTxt(durMin(tin, tout));
+  else if(tin && st === 'working' && isToday()) worked = hTxt(Math.max(0, nowMin() - mins(tin)));
+  const arr = Math.max(b.s, 0) + Math.max(b.t, 0), adv = Math.max(-b.s, 0) + Math.max(-b.t, 0);
+  const asal = e ? num(e.arrears_salary_paid) : 0, atr = e ? num(e.arrears_transport_paid) : 0;
+  const closeS = b.s + (sd - sp) - asal, closeT = b.t + (td - tp) - atr, close = closeS + closeT;
+  const m = monthT[id] || { days:0, earned:0, paid:0 };
+  const badges = [isEtf ? '<span class="etf">ETF</span>' : '', e && e.attendance === 'half_day' ? '<span class="hf">HALF DAY</span>' : '', arr > EPS ? '<span class="ar">ARREARS ' + rs(arr) + '</span>' : '', adv > EPS ? '<span class="ad">ADVANCE ' + rs(adv) + '</span>' : ''].join('');
+  const av = photos[id] ? `<img alt="" src="${photos[id]}">` : esc(initials(t.name));
+  const sub = [t.designation, t.employee_no ? '#' + t.employee_no : ''].filter(Boolean).join(' · ') || 'Technician';
+  const front = `<div class="face front" style="--sc:${S.color}">
+    <div class="top"><div class="av" data-av="${esc(id)}" style="--ac:${avColor(id)}">${av}</div><div class="nm"><b>${esc(t.name)}</b><small>${esc(sub)}</small></div><span class="st ${st}">${S.label}</span></div>
+    <div class="tm"><div><label>In</label><b>${tin || '—'}</b></div><div><label>Out</label><b>${tout || '—'}</b></div><div><label>Worked</label><b data-since="${st === 'working' && isToday() && tin ? tin : ''}">${worked}</b></div></div>
+    <div class="mn"><div><label>Salary</label><b>${rs(sd)}</b></div><div><label>Transport</label><b>${rs(td)}</b></div><div class="tot"><label>Total earned</label><b>${rs(earned)}</b></div></div>
+    <div class="pbar"><i style="--p:${pct.toFixed(1)}%"></i></div>
+    <div class="pl"><span>Paid ${rs(paid)}</span>${!e ? '<span>No record yet</span>' : un > EPS ? `<span class="u">Unpaid ${rs(un)}</span>` : un < -EPS ? `<span class="o">Overpaid ${rs(-un)}</span>` : earned > EPS ? '<span class="k">Settled ✓</span>' : ''}</div>
+    <div class="bd">${badges}</div><span class="flip-h">tap for details ⟳</span></div>`;
+  const back = `<div class="face back" style="--sc:${S.color}">
+    <div class="top"><div class="av" style="--ac:${avColor(id)}">${av}</div><div class="nm"><b>${esc(t.name)}</b><small>${S.label}${tin ? ' · In ' + tin : ''}${tout ? ' · Out ' + tout : ''}</small></div></div>
+    <div class="kv"><div class="h">Today</div>${moneyRow('Salary', sd, sp)}${moneyRow('Transport', td, tp)}
+      ${e && num(e.etf_deduction) > EPS ? `<div><b>ETF deducted</b><span>${rs(e.etf_deduction)}</span></div>` : ''}
+      ${asal + atr > EPS ? `<div><b>Arrears settled</b><span class="pos">${rs(asal + atr)}${e.arrears_day ? '<br><small style="color:var(--mu)">for ' + esc(String(e.arrears_day).slice(0, 10)) + '</small>' : ''}</span></div>` : ''}
+      <div class="h">Brought forward</div>
+      <div><b>Arrears</b><span class="${arr > EPS ? 'neg' : ''}">${arr > EPS ? rs(arr) : 'none'}</span></div>
+      <div><b>Advance</b><span class="${adv > EPS ? 'pos' : ''}">${adv > EPS ? rs(adv) : 'none'}</span></div>
+      <div><b>Balance after today</b><span class="${close > EPS ? 'neg' : close < -EPS ? 'pos' : ''}">${close > EPS ? rs(close) + ' owed' : close < -EPS ? rs(-close) + ' advance' : 'clear ✓'}</span></div>
+      <div class="h">This month</div>
+      <div><b>Days present</b><span>${m.days}</span></div>
+      <div><b>Earned / paid</b><span>${rs(m.earned)}<br><small style="color:var(--mu)">paid ${rs(m.paid)}</small></span></div></div>
+    ${e && e.note ? `<div class="note">📝 ${esc(e.note)}</div>` : ''}<span class="flip-h">tap to go back ⟳</span></div>`;
+  return front + back;
+}
+function renderCards(){
+  const grid = $('grid');
+  grid.querySelectorAll('.skel').forEach(n => n.remove());
+  const rows = rowsAll().filter(passes).sort((a, b) => ORDER[a.st] - ORDER[b.st] || String(a.t.name).localeCompare(String(b.t.name)));
+  const old = {}; grid.querySelectorAll('.fc[data-id]').forEach(n => { old[n.dataset.id] = n; });
+  const keep = new Set(rows.map(r => r.id));
+  Object.keys(old).forEach(id => { if(!keep.has(id)) old[id].remove(); });
+  const emp = grid.querySelector('.empty'); if(emp) emp.remove();
+  if(!rows.length){ grid.innerHTML = '<div class="empty">' + (techs.length ? 'No technicians match this filter.' : 'No technicians found.') + '</div>'; return; }
+  rows.forEach((r, i) => {
+    let node = old[r.id];
+    const sig = JSON.stringify([r.e, r.b, r.st, monthT[r.id], etfSet.has(r.id), photos[r.id] ? 1 : 0, isToday() ? nowMin() : 0, r.t.name, r.t.designation, r.t.employee_no]);
+    if(!node){
+      node = document.createElement('div'); node.className = 'fc kw'; node.dataset.id = r.id; node.tabIndex = 0; node.setAttribute('role', 'button'); node.style.setProperty('--i', Math.min(i, 10));
+      node.innerHTML = '<div class="fi tilt"></div>';
+    }
+    if(node.dataset.sig !== sig){ node.dataset.sig = sig; node.querySelector('.fi').innerHTML = cardInner(r); }
+    node.setAttribute('aria-label', r.t.name + ' — tap to flip');
+    if(grid.children[i] !== node) grid.insertBefore(node, grid.children[i] || null);
+  });
+}
+$('grid').addEventListener('click', e => { const c = e.target.closest('.fc'); if(c) c.classList.toggle('flipped'); });
+$('grid').addEventListener('keydown', e => { if((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('fc')){ e.preventDefault(); e.target.classList.toggle('flipped'); } });
+// keep "working" durations ticking without re-rendering the cards
+setInterval(() => {
+  if(document.hidden || !isToday()) return;
+  document.querySelectorAll('[data-since]').forEach(el => { const s = el.dataset.since; if(s) el.textContent = hTxt(Math.max(0, nowMin() - mins(s))); });
+}, 30000);
+
+/* ---------- profile photos (loaded one by one, only for people who have one) ---------- */
+async function loadPhotos(){
+  if(photoQueue) return; photoQueue = true;
+  try{
+    for(const t of techs){
+      const id = String(t.id); if(!t.photo_path || photos[id] || photos[id] === false) continue;
+      try{ photos[id] = await api('getFileDataUrl', t.photo_path); }catch(e){ photos[id] = false; continue; }
+      document.querySelectorAll('.av[data-av="' + CSS.escape(id) + '"]').forEach(a => { a.innerHTML = '<img alt="" src="' + photos[id] + '">'; });
+      const c = document.querySelector('.fc[data-id="' + CSS.escape(id) + '"]'); if(c) c.dataset.sig = '';
+    }
+  }finally{ photoQueue = false; }
+  for(const k in photos) if(photos[k] === false) delete photos[k], photos[k] = undefined;
+}
+
+/* ---------- date navigation ---------- */
+function goTo(d){ if(!d || d > todayStr()) d = todayStr(); day = d; F.f = F.f; showBanner(''); load(); }
+$('prev').addEventListener('click', () => goTo(addDays(day, -1)));
+$('next').addEventListener('click', () => { if(!isToday()) goTo(addDays(day, 1)); });
+$('today').addEventListener('click', () => goTo(todayStr()));
+$('dayIn').addEventListener('change', e => goTo(e.target.value));
+$('refresh').addEventListener('click', () => load(true));
+document.addEventListener('keydown', e => { if(/INPUT/.test(document.activeElement.tagName)) return; if(e.key === 'ArrowLeft') $('prev').click(); if(e.key === 'ArrowRight') $('next').click(); });
+
+/* =====================================================================
+ * DEMO DATA (only used when the page is opened with ?demo=1)
+ * ===================================================================== */
+function demoApi(fn, args){
+  const rnd = seed => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const names = [['Nimal Perera', 'Senior Technician'], ['Kasun Silva', 'Technician'], ['Saman Kumara', 'Technician'], ['Dilshan Fernando', 'Field Engineer'], ['Chamara Jayasinghe', 'Technician'],
+    ['Ruwan Bandara', 'Technician'], ['Tharindu Wickrama', 'Junior Technician'], ['Isuru Madushanka', 'Technician'], ['Lahiru Gunawardena', 'Senior Technician'], ['Pasan Rajapaksha', 'Junior Technician'], ['Sandun Herath', 'Technician'], ['Janaka Dissanayake', 'Field Engineer']];
+  if(fn === 'listTechnicians') return names.map((n, i) => ({ id:'t' + (i + 1), name:n[0], designation:n[1], employee_no:'E' + (100 + i), active:true, role:'technician', photo_path:null }));
+  if(fn === 'listEtfMembers') return ['t1', 't4', 't9'];
+  if(fn === 'listSalaryBalances') return [{ id:'t3', salary_arrears:4200, transport_arrears:600 }, { id:'t6', salary_arrears:2500, transport_arrears:0 }, { id:'t8', salary_arrears:1800, transport_arrears:400 }, { id:'t5', salary_arrears:-1500, transport_arrears:-200 }, { id:'t11', salary_arrears:-900, transport_arrears:0 }];
+  if(fn === 'listSalaryEntries'){
+    const from = args[1], to = args[2], out = [], today = todayStr(), nowM = nowMin();
+    for(let d = from; d <= to; d = addDays(d, 1)){
+      names.forEach((n, i) => {
+        const r = rnd(i * 977 + d.split('-').join('') * 1)(), r2 = rnd(i * 313 + d.split('-').join('') * 7)(), r3 = rnd(i * 71 + Number(d.split('-')[2]) * 13)();
+        const sun = new Date(d + 'T00:00:00').getDay() === 0, base = 2200 + (i % 5) * 450, tr = 250 + (i % 4) * 90, sal = sun ? Math.round(base * 1.5) : base;
+        if(d === today){
+          const mode = i % 12; if(mode === 7){ return; } if(mode === 10){ return; }
+          if(mode === 6){ out.push({ technician_id:'t' + (i + 1), entry_date:d, attendance:'absent', salary_due:0, transport_due:0, salary_paid:0, transport_paid:0 }); return; }
+          if(mode === 9){ out.push({ technician_id:'t' + (i + 1), entry_date:d, attendance:'leave', salary_due:0, transport_due:0, salary_paid:0, transport_paid:0 }); return; }
+          const inM = 7 * 60 + 30 + Math.round(r * 75); if(inM > nowM) return;
+          const done = (i % 3 === 0) && nowM > inM + 300, outM = done ? Math.min(nowM - 5, inM + 480 + Math.round(r2 * 60)) : null;
+          out.push({ technician_id:'t' + (i + 1), entry_date:d, attendance:i === 4 ? 'half_day' : 'present', salary_due:i === 4 ? sal / 2 : sal, transport_due:tr, salary_paid:i % 2 ? sal : 0, transport_paid:i % 2 ? tr : 0,
+            time_in:p2(Math.floor(inM / 60)) + ':' + p2(inM % 60) + ':00', time_out:outM ? p2(Math.floor(outM / 60)) + ':' + p2(outM % 60) + ':00' : null, etf_deduction:(i === 0 || i === 3 || i === 8) ? Math.round(sal * .08) : 0,
+            arrears_salary_paid:i === 2 ? 1000 : 0, arrears_transport_paid:0, arrears_day:i === 2 ? addDays(d, -3) : null, note:i === 1 ? 'Site visit — Negombo branch' : null });
+          return;
+        }
+        if(r3 < .12 && !sun) return;
+        const inM = 7 * 60 + 25 + Math.round(r * 70), outM = inM + 480 + Math.round(r2 * 90), part = r2 > .85;
+        out.push({ technician_id:'t' + (i + 1), entry_date:d, attendance:r3 > .93 ? 'half_day' : 'present', salary_due:sal, transport_due:tr, salary_paid:part ? Math.round(sal * .5) : sal, transport_paid:tr,
+          time_in:p2(Math.floor(inM / 60)) + ':' + p2(inM % 60) + ':00', time_out:p2(Math.floor(outM / 60) % 24) + ':' + p2(outM % 60) + ':00', etf_deduction:0, arrears_salary_paid:0, arrears_transport_paid:0 });
+      });
+    }
+    return out;
+  }
+  return null;
+}
+
+/* ---------- go ---------- */
+$('dayIn').value = day; renderChips();
+load(true);
+</script>
+</body>
+</html>
